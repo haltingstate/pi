@@ -1451,5 +1451,25 @@ export default function(pi: ExtensionAPI) {
 
 			expect(files[0].content).toBe("rule text");
 		});
+
+		it("should remove a comment that spans several lines", () => {
+			writeFileSync(
+				join(tempDir, "AGENTS.md"),
+				["rule one", "<!--", "note a", "note b", "-->", "rule two"].join("\n"),
+			);
+
+			const files = loadProjectContextFiles({ cwd: tempDir, agentDir });
+
+			expect(files[0].content).toBe("rule one\nrule two");
+		});
+
+		it("should keep a comment that never closes, rather than delete the rest of the file", () => {
+			const content = "rule one\n<!-- oops\nrule two";
+			writeFileSync(join(tempDir, "AGENTS.md"), content);
+
+			const files = loadProjectContextFiles({ cwd: tempDir, agentDir });
+
+			expect(files[0].content).toBe(content);
+		});
 	});
 });
